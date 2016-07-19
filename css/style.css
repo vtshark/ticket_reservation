@@ -1,0 +1,41 @@
+a {
+    background: #F4AAA0;
+    margin: 3px;
+    padding: 5px;
+    border-radius: 2px;
+    text-decoration: none;
+}
+button {
+    background: #F4AAA0;
+    margin: 3px;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.row {
+    background: #F4A460;
+    width: 60px;
+    height: 30px;
+    display: inline-block;
+    margin: 2px;
+    border-radius: 2px;
+    padding: 2px;
+    text-align: center;
+}
+.seat {
+    background: #d0d8dF;
+    width: 3%;
+    height: 30px;
+}
+.seat:hover {
+    background: #FFE4C4;
+    cursor: pointer;
+}
+#sector,#freeSeats,#countSeats {
+    background: #F4A460;
+    border: none;
+    padding: 2px;
+    width: 40px;
+    text-align: center;
+    border-radius: 2px;
+}
