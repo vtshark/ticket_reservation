@@ -4,21 +4,19 @@ var ROOT = "/";
 function selectSeats() {
     var sector = $("#sector").val();
     var ip = $("#ip").val();
-    var arr;
+    var arr; // буферный массив
     var url = ROOT + "main/getSelSeats/";
-    var color = "";
+    var color = "";  //цвет места
     var counter = 0; //счетчик кол-ва отмеченных мест
      $.post(url, {sector: sector},
      function (result) {
         if (result) {
-            //console.log(result);
             var obj = JSON.parse(result);
 
             $.each(obj, function (i, row) {
 
                 $.each(row, function (j, val) {
                     arr = val.split("#");
-                    //console.log(val);
                     counter++;
 
                     if (arr[0] == 1) {
@@ -59,7 +57,6 @@ $(document).ready(function() {
 
         $.post(url, {sector: sector, row: row, seat: seat},
             function (result) {
-                //console.log(result);
                 switch (+result) {
                     case 0:
                         $("#"+id).css({ "background-color": '' }); //отмена выбора
@@ -87,7 +84,6 @@ $(document).ready(function() {
         var url = ROOT + "main/reservation/";
         $.post(url, {sector: sector},
             function (result) {
-                //console.log(result);
                 selectSeats();
             });
 

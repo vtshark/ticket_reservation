@@ -3,7 +3,6 @@
 $sectors = ["A","B","C","D"];   //массив секторов
 $numberOfRows = 15;             //количество рядов
 $numberOfColumns = 15;          //количество мест
-//$ip = $_SERVER['REMOTE_ADDR'];
 $ip = IP;
 $countSeats = $numberOfRows*$numberOfColumns;
 
