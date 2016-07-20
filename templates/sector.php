@@ -19,7 +19,7 @@ $countSeats = $numberOfRows*$numberOfColumns;
 
 Сектор:
     <input id = "sector" value = "<?= $sector ?>" readonly>
-    <input id = "ip" value = "<?= $ip ?>" readonly>
+    <input id = "ip" value = "<?= $ip ?>" readonly hidden>
  Кол-во мест в секторе
     <input id = "countSeats" value = "<?= $countSeats ?>" readonly>
  Свободно  <input id = "freeSeats" value = "<?= $countSeats ?>" readonly> мест
