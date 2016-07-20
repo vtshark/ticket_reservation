@@ -76,17 +76,17 @@ class Main {
     //бронирование
     public function reservations() {
 
-        $arr = $this->cache->get($this->ip); //массив отмеченных мест
+        $selectSeats = $this->cache->get($this->ip); //массив отмеченных мест
         $str_error = "";
-        if ($arr) {
+        if ($selectSeats) {
 
             /* проверка - не забронировал ли другой пользователь
                одно из выбранных мест */
-            foreach ($arr as $sector => $sectors) {
-                $buf_arr = $this->getReservSeats($sector);
+            foreach ($selectSeats as $sector => $sectors) {
+                $reservSeats = $this->getReservSeats($sector);
                 foreach ($sectors as $i => $rows) {
                     foreach ($rows as $j => $v) {
-                        if (isset($buf_arr[$i][$j])) {
+                        if (isset($reservSeats[$i][$j])) {
                             $str_error .= "Извините, сектор:$sector ряд:$i место:$j уже забронировано.\n";
                         }
                     }
@@ -95,15 +95,15 @@ class Main {
 
             /* если все ок, сохраняем выбранные места в БД, и сразу обновляем инфо в кеш */
             if (!$str_error) {
-                foreach ($arr as $sector => $sectors) {
-                    $buf_arr = $this->getReservSeats($sector);
+                foreach ($selectSeats as $sector => $sectors) {
+                    $reservSeats = $this->getReservSeats($sector);
                     foreach ($sectors as $i => $rows) {
                         foreach ($rows as $j => $v) {
-                            $buf_arr[$i][$j] = "";
+                            $reservSeats[$i][$j] = "";
                             $this->saveTicketsDB($sector, $i, $j, $this->ip);
                         }
                     }
-                    $this->cache->set($sector, $buf_arr, false, 0);
+                    $this->cache->set($sector, $reservSeats, false, 0);
                 }
                 $this->cache->delete($this->ip);
             }

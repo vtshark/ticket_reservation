@@ -10,6 +10,7 @@ class Routing {
         $path = $_SERVER['REQUEST_URI'];
         $arr = explode("/",$path);
 
+        //если сайт в корне
         $classNum = 1;
         $methodNum = 2;
         $paramNum = 3;
