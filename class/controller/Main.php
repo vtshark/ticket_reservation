@@ -65,10 +65,10 @@ class Main extends Controller{
     //бронирование
     public function reservation() {
 
-        //$sector = isset($_POST['sector']) ? $_POST['sector'] : "A";
         $this->model = new \model\Main();
         $str_error = $this->model->reservations();
         echo $str_error;
+
     }
 
     //очистить кэш
