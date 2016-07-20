@@ -3,12 +3,10 @@ namespace core;
 class connectPDO {
     protected $db;
     private $settings = "mysql:host=localhost;dbname=tallium";
-    //private $settings = "mysql:host=mysql.hostinger.com.ua;dbname=u296156972_bj";
 
     function __construct() {
         try {
             $this->db = new \PDO($this->settings, "root", "");
-            //$this->db = new \PDO($this->settings, "u296156972_bj", "ddd123");
         }
         catch (PDOException $e) {
             die($e->getMessage());

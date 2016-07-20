@@ -1,48 +1,47 @@
 var ROOT = "/";
 
-///функция выделяющая отмеченные места в секторе после загрузки страницы
-function selectSeats() {
+//функция выделяющая зарезервированные места в секторе после загрузки страницы
+function showReservSeats() {
     var sector = $("#sector").val();
-    var ip = $("#ip").val();
-    var arr; // буферный массив
-    var url = ROOT + "main/getSelSeats/";
-    var color = "";  //цвет места
+    var url = ROOT + "main/getReservSeats/";
     var counter = 0; //счетчик кол-ва отмеченных мест
      $.post(url, {sector: sector},
      function (result) {
         if (result) {
             var obj = JSON.parse(result);
-
             $.each(obj, function (i, row) {
-
                 $.each(row, function (j, val) {
-                    arr = val.split("#");
                     counter++;
-
-                    if (arr[0] == 1) {
-                        color = '#8888DD';
-                    } else {
-                        if (arr[1] === ip) {
-                            color = '#AADDAA'; //место, отмеченное пользователем
-                        } else {
-                            color = '#BBBBBB'; //место, отмеченное др. пользователем
-                        }
-                    }
-
-                    $("#" + i + "-" + j).css({"background-color": color});
-
+                    $("#" + i + "-" + j).css({"background-color": '#8888DD'});
                 });
-
             });
             $("#freeSeats").val( $("#countSeats").val() - counter);
         }
      });
 }
 
+//функция выделяющая выбранные пользоваетелем места в секторе после загрузки страницы
+function showSelectSeats() {
+    var sector = $("#sector").val();
+    var url = ROOT + "main/getSelectSeats/";
+    $.post(url, {sector: sector},
+        function (result) {
+            if (result) {
+                var obj = JSON.parse(result);
+                $.each(obj, function (i, row) {
+                    $.each(row, function (j, val) {
+                        $("#" + i + "-" + j).css({"background-color": '#AADDAA'});
+                    });
+                });
+            }
+        });
+}
+
 
 $(document).ready(function() {
 
-    selectSeats();
+    showSelectSeats();
+    showReservSeats();
 
     // выбор места в секторе
     $(".seat").on("click", function (e) {
@@ -57,6 +56,7 @@ $(document).ready(function() {
 
         $.post(url, {sector: sector, row: row, seat: seat},
             function (result) {
+
                 switch (+result) {
                     case 0:
                         $("#"+id).css({ "background-color": '' }); //отмена выбора
@@ -65,9 +65,6 @@ $(document).ready(function() {
                         $("#"+id).css({ "background-color": '#AADDAA' }); //выбор места
                         break;
                     case 2:
-                        alert("Извините, место уже бронируется другим пользователем!");
-                        break;
-                    case 3:
                         alert("Извините, место уже забронировано!");
                         break;
                 }
@@ -84,7 +81,11 @@ $(document).ready(function() {
         var url = ROOT + "main/reservation/";
         $.post(url, {sector: sector},
             function (result) {
-                selectSeats();
+                if (result) {
+                    alert(result);
+                } else {
+                    showReservSeats();
+                }
             });
 
     });

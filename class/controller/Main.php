@@ -32,20 +32,32 @@ class Main extends Controller{
 
         $sector = isset($param[0]) ? $param[0] : "A";
 
+        //проверка кэш
         $this->model = new \model\Main();
         $this->model->checkCache($sector);
 
+        //вывод на экран сектора
         $this->view = new \view\Main();
         $this->view->sector($sector);
 
     }
 
-    //считывание массива отмеченных мест
-    public function getSelSeats() {
+    //считывание массива забронированных мест
+    public function getReservSeats() {
 
         $sector = isset($_POST['sector']) ? $_POST['sector'] : "A";
         $this->model = new \model\Main();
-        $result = $this->model->getSelSeats($sector);
+        $result = $this->model->getReservSeats($sector);
+        echo $result ? json_encode($result) : "";
+
+    }
+
+    //считывание массива отмеченных мест
+    public function getSelectSeats() {
+
+        $sector = isset($_POST['sector']) ? $_POST['sector'] : "A";
+        $this->model = new \model\Main();
+        $result = $this->model->getSelectSeats($sector);
         echo $result ? json_encode($result) : "";
 
     }
@@ -53,10 +65,10 @@ class Main extends Controller{
     //бронирование
     public function reservation() {
 
-        $sector = isset($_POST['sector']) ? $_POST['sector'] : "A";
+        //$sector = isset($_POST['sector']) ? $_POST['sector'] : "A";
         $this->model = new \model\Main();
-        $this->model->reservations($sector);
-
+        $str_error = $this->model->reservations();
+        echo $str_error;
     }
 
     //очистить кэш

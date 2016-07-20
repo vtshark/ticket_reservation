@@ -15,10 +15,18 @@ class Main {
 
     }
 
-    //считывание массива отмеченных мест из кэш
-    public function getSelSeats($sector) {
+    //считывание массива забронированных мест из кэш
+    public function getReservSeats($sector) {
 
         return $this->cache->get($sector);
+
+    }
+
+    //считывание массива отмеченных мест из кэш
+    public function getSelectSeats($sector) {
+
+        $seats = $this->cache->get($this->ip);
+        return $seats[$sector];
 
     }
 
@@ -26,69 +34,82 @@ class Main {
     public function selectSeat($sector, $row, $seat) {
         // result = 0 отмена выбора
         // result = 1 выбрать место
-        // result = 2 место выбрано другим пользователем
-        // result = 3 место забронировано
-        $result = 1;
+        // result = 2 место забронировано
+        $seats = $this->cache->get($this->ip);
 
-        $arr = $this->cache->get($sector);
+        //если был повторный клик по выбранному месту - удаляем место из массива
+        if (isset($seats[$sector][$row][$seat])) {
 
-        if (isset($arr[$row][$seat])) {
+            unset($seats[$sector][$row][$seat]);
 
-            $bufArr = explode("#",$arr[$row][$seat]); //$bufArr временный массив
-            $ipUser = $bufArr[1];
-            $reserv = $bufArr[0];
-
-            if ($ipUser == $this->ip && !$reserv) {
-
-                $result = 0;
-                unset($arr[$row][$seat]);
-
-                if (count($arr[$row]) == 0) {
-                    unset($arr[$row]);
-                }
-
-                $this->cache->set($sector, $arr, false, 0);
-
-            } else {
-
-                $result = ($reserv) ? 3 : 2;
-
+            if (count($seats[$sector][$row]) == 0) {
+                unset($seats[$sector][$row]);
             }
+            if (count($seats[$sector]) == 0) {
+                unset($seats[$sector]);
+            }
+            $result = 0;
 
         } else {
 
-            $arr[$row][$seat] = "0#".$this->ip;
-            $this->cache->set($sector, $arr, false, 0);
+            $arr = $this->cache->get($sector);
+
+            // забронированно ли место
+            if (isset($arr[$row][$seat])) {
+
+                $result = 2;
+
+            } else {
+
+                $seats[$sector][$row][$seat] = 0;
+                $result = 1;
+            }
 
         }
+
+        $this->cache->set($this->ip, $seats, false, 600); //хранить в кеш 10 мин
 
         echo $result;
         exit(0);
-
     }
 
     //бронирование
-    public function reservations($sector) {
+    public function reservations() {
 
-        $arr = $this->getSelSeats($sector);
+        $arr = $this->cache->get($this->ip); //массив отмеченных мест
+        $str_error = "";
+        if ($arr) {
 
-        foreach($arr as $i => $row) {
-            foreach($row as $j => $v) {
-
-                // $bufArr временный массив
-                // [0] - признак (0 - место выбрано, 1 - место забронировано)
-                // [1] - ip пользовател
-                $bufArr = explode("#",$v);
-
-                if ($bufArr[1] == $this->ip && $bufArr[0] == 0) {
-
-                    $arr[$i][$j] = "1#".$this->ip;
-                    $this->saveTicketsDB($sector,$i,$j,$this->ip);
-
+            /* проверка - не забронировал ли другой пользователь
+               одно из выбранных мест */
+            foreach ($arr as $sector => $sectors) {
+                $buf_arr = $this->getReservSeats($sector);
+                foreach ($sectors as $i => $rows) {
+                    foreach ($rows as $j => $v) {
+                        if (isset($buf_arr[$i][$j])) {
+                            $str_error .= "Извините, сектор:$sector ряд:$i место:$j уже забронировано.\n";
+                        }
+                    }
                 }
             }
+
+            /* если все ок, сохраняем выбранные места в БД, и сразу обновляем инфо в кеш */
+            if (!$str_error) {
+                foreach ($arr as $sector => $sectors) {
+                    $buf_arr = $this->getReservSeats($sector);
+                    foreach ($sectors as $i => $rows) {
+                        foreach ($rows as $j => $v) {
+                            $buf_arr[$i][$j] = "";
+                            $this->saveTicketsDB($sector, $i, $j, $this->ip);
+                        }
+                    }
+                    $this->cache->set($sector, $buf_arr, false, 0);
+                }
+                $this->cache->delete($this->ip);
+            }
+
         }
-        $this->cache->set($sector, $arr, false, 0);
+        return $str_error;
     }
 
     //добавление брОни в базу данных
@@ -116,9 +137,8 @@ class Main {
         foreach($tickets as $v) {
             $row = $v['row'];
             $seat = $v['seat'];
-            $ip = $v['ip'];
             $sector = $v['sector'];
-            $seats[$sector][$row][$seat] = "1#".$ip;
+            $seats[$sector][$row][$seat] = "";
         }
 
         $sectors = ["A","B","C","D"];
@@ -133,8 +153,9 @@ class Main {
 
         if ( !is_array($this->cache->get($sector)) ) {
             $this->readDB();
-            echo "read DB";
+            //echo "readDB";
         }
+
     }
 
     //очистить кэш
